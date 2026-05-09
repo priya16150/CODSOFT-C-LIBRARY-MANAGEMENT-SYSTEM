@@ -9,12 +9,10 @@
 #include <iomanip>
 #include <limits>
 
-// ============================== DATE CLASS ==============================
 class Date {
 private:
     int year, month, day;
 
-    // Get days in a month (considering leap years)
     int daysInMonth(int m, int y) const {
         if (m == 2) {
             return (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 29 : 28;
@@ -26,7 +24,6 @@ public:
     Date() : year(0), month(0), day(0) {}
     Date(int y, int m, int d) : year(y), month(m), day(d) {}
 
-    // Create Date from string "YYYY-MM-DD"
     static Date fromString(const std::string& dateStr) {
         int y, m, d;
         char dash1, dash2;
@@ -43,14 +40,12 @@ public:
         return ss.str();
     }
 
-    // Get current system date
     static Date currentDate() {
         std::time_t t = std::time(nullptr);
         std::tm* now = std::localtime(&t);
         return Date(now->tm_year + 1900, now->tm_mon + 1, now->tm_mday);
     }
 
-    // Add days to date
     Date addDays(int days) const {
         Date result = *this;
         result.day += days;
@@ -65,9 +60,7 @@ public:
         return result;
     }
 
-    // Calculate difference in days (this - other)
     int daysDifference(const Date& other) const {
-        // Simple approximation: convert to days since a reference
         auto toDays = [](const Date& d) {
             int days = d.year * 365 + d.day;
             for (int m = 1; m < d.month; m++) {
@@ -97,7 +90,6 @@ public:
     }
 };
 
-// ============================== BOOK CLASS ==============================
 class Book {
 private:
     std::string isbn;
@@ -110,23 +102,17 @@ public:
     Book(const std::string& isbn, const std::string& title, const std::string& author)
         : isbn(isbn), title(title), author(author), available(true) {}
 
-    // Getters
     std::string getISBN() const { return isbn; }
     std::string getTitle() const { return title; }
     std::string getAuthor() const { return author; }
     bool isAvailable() const { return available; }
-
-    // Setters
     void setAvailable(bool avail) { available = avail; }
-
-    // Display
     void display() const {
         std::cout << "ISBN: " << isbn << " | Title: " << title 
                   << " | Author: " << author << " | Status: " 
                   << (available ? "Available" : "Checked Out") << std::endl;
     }
 
-    // Serialization
     std::string toFileString() const {
         return isbn + "|" + title + "|" + author + "|" + (available ? "1" : "0");
     }
@@ -144,7 +130,6 @@ public:
     }
 };
 
-// ============================== BORROWER CLASS ==============================
 class Borrower {
 private:
     int id;
@@ -178,7 +163,6 @@ public:
     }
 };
 
-// ============================== TRANSACTION CLASS ==============================
 class Transaction {
 private:
     int transactionID;
@@ -267,7 +251,6 @@ public:
     }
 };
 
-// ============================== LIBRARY SYSTEM ==============================
 class LibrarySystem {
 private:
     std::vector<Book> books;
@@ -275,27 +258,23 @@ private:
     std::vector<Transaction> transactions;
     int nextBorrowerID;
     int nextTransactionID;
-    const double FINE_PER_DAY = 0.50;  // $0.50 per day late
-    const int LOAN_DAYS = 14;          // 2 weeks loan period
+    const double FINE_PER_DAY = 0.50;  
+    const int LOAN_DAYS = 14;        
 
-    // File names
     const std::string BOOKS_FILE = "books.txt";
     const std::string BORROWERS_FILE = "borrowers.txt";
     const std::string TRANSACTIONS_FILE = "transactions.txt";
 
-    // Helper: Convert string to lowercase
     std::string toLower(const std::string& str) const {
         std::string result = str;
         std::transform(result.begin(), result.end(), result.begin(), ::tolower);
         return result;
     }
 
-    // Helper: Check if a string contains another (case-insensitive)
     bool containsIgnoreCase(const std::string& str, const std::string& substr) const {
         return toLower(str).find(toLower(substr)) != std::string::npos;
     }
 
-    // Load data from files
     void loadBooks() {
         std::ifstream file(BOOKS_FILE);
         if (!file.is_open()) return;
@@ -341,7 +320,6 @@ private:
         file.close();
     }
 
-    // Save data to files
     void saveBooks() const {
         std::ofstream file(BOOKS_FILE);
         for (const auto& book : books) {
@@ -366,7 +344,6 @@ private:
         file.close();
     }
 
-    // Find book by ISBN
     int findBookIndex(const std::string& isbn) const {
         for (size_t i = 0; i < books.size(); i++) {
             if (books[i].getISBN() == isbn) {
@@ -376,7 +353,6 @@ private:
         return -1;
     }
 
-    // Find borrower by ID
     int findBorrowerIndex(int id) const {
         for (size_t i = 0; i < borrowers.size(); i++) {
             if (borrowers[i].getID() == id) {
@@ -386,7 +362,6 @@ private:
         return -1;
     }
 
-    // Find active transaction (not returned) for a book
     int findActiveTransactionByISBN(const std::string& isbn) const {
         for (size_t i = 0; i < transactions.size(); i++) {
             if (!transactions[i].isReturned() && transactions[i].getISBN() == isbn) {
@@ -409,7 +384,6 @@ public:
         saveTransactions();
     }
 
-    // ====================== BOOK MANAGEMENT ======================
     void addBook() {
         std::string isbn, title, author;
         std::cin.ignore();
@@ -494,7 +468,6 @@ public:
         }
     }
 
-    // ====================== BORROWER MANAGEMENT ======================
     void registerBorrower() {
         std::string name, phone;
         std::cin.ignore();
@@ -520,7 +493,6 @@ public:
         }
     }
 
-    // ====================== CHECKOUT & RETURN ======================
     void checkoutBook() {
         std::string isbn;
         int borrowerID;
@@ -547,7 +519,6 @@ public:
             return;
         }
         
-        // Process checkout
         Date checkoutDate = Date::currentDate();
         Date dueDate = checkoutDate.addDays(LOAN_DAYS);
         
@@ -600,7 +571,6 @@ public:
         }
     }
 
-    // ====================== TRANSACTIONS & FINES ======================
     void displayAllTransactions() const {
         if (transactions.empty()) {
             std::cout << "No transactions.\n";
@@ -650,7 +620,6 @@ public:
         }
     }
 
-    // ====================== MAIN MENU ======================
     void displayMenu() const {
         std::cout << "\n========================================\n";
         std::cout << "       LIBRARY MANAGEMENT SYSTEM        \n";
@@ -724,7 +693,6 @@ public:
     }
 };
 
-// ============================== MAIN FUNCTION ==============================
 int main() {
     LibrarySystem library;
     library.run();
